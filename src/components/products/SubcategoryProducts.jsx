@@ -13,8 +13,8 @@ const ProductsPage = () => {
     const [pageSize, setPageSize] = useState(12);
     const [pagination, setPagination] = useState({
         currentPage: 1,
-        totalPages: 2,
-        totalProducts: 13,
+        totalPages: 0,
+        totalProducts: 0,
     });
 
     useEffect(() => {
@@ -22,6 +22,8 @@ const ProductsPage = () => {
             try {
                 const response = await getProductsBySubcategory(subcategoryId, pageSize, pagination.currentPage);
                 const products = response.data.products;
+                const totalProducts = response.totalProducts;
+                console.log(totalProducts);
 
                 if (products.length === 0) {
                     setNoProducts(true);
@@ -29,6 +31,12 @@ const ProductsPage = () => {
                     setProducts(products);
                     setSubcategory(products[0].subcategory);
                 }
+                setPagination({
+                    currentPage:pagination.currentPage,
+                    totalPages: ((totalProducts%pageSize)!=0?(Math.trunc(totalProducts/pageSize)+1):Math.trunc(totalProducts/pageSize)),
+                    totalProducts: totalProducts,
+                });
+                
             } catch (err) {
                 console.error('Error fetching products:', err);
                 setError('Failed to load products');
@@ -40,6 +48,8 @@ const ProductsPage = () => {
         fetchProducts();
     }, [subcategoryId, pageSize, pagination.currentPage]);
 
+    console.log(pagination, "totalPages")
+
     const handlePageSizeChange = (event) => {
         setPageSize(parseInt(event.target.value));
         setPagination({ ...pagination, currentPage: 1 });
@@ -48,6 +58,7 @@ const ProductsPage = () => {
     const handlePageChange = (newPage) => {
         if (newPage > 0 && newPage <= pagination.totalPages) {
             setPagination({ ...pagination, currentPage: newPage });
+            console.log(pagination.currentPage, "currentPage");
         }
     };
 
